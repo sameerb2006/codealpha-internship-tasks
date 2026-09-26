@@ -1,0 +1,229 @@
+  task -4
+ bank mangament system 
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Account
+{
+    int accountNumber;
+    char name[50];
+    float balance;
+};
+
+void createAccount()
+{
+    struct Account account;
+    FILE *file;
+
+    file = fopen("account.dat", "ab");
+
+    if(file == NULL)
+    {
+        printf("File cannot be opened.\n");
+        return;
+    }
+
+    printf("\nEnter Account Number: ");
+    scanf("%d", &account.accountNumber);
+
+    printf("Enter Name: ");
+    scanf(" %[^\n]", account.name);
+
+    printf("Enter Initial Balance: ");
+    scanf("%f", &account.balance);
+
+    fwrite(&account, sizeof(account), 1, file);
+
+    fclose(file);
+
+    printf("\nAccount created successfully!\n");
+}
+
+void deposit()
+{
+    struct Account account;
+    FILE *file;
+    int accountNumber;
+    float amount;
+    int found = 0;
+
+    printf("\nEnter Account Number: ");
+    scanf("%d", &accountNumber);
+
+    file = fopen("account.dat", "rb+");
+
+    if(file == NULL)
+    {
+        printf("No account file found.\n");
+        return;
+    }
+
+    while(fread(&account, sizeof(account), 1, file))
+    {
+        if(account.accountNumber == accountNumber)
+        {
+            printf("Enter deposit amount: ");
+            scanf("%f", &amount);
+
+            account.balance = account.balance + amount;
+
+            fseek(file, -sizeof(account), SEEK_CUR);
+
+            fwrite(&account, sizeof(account), 1, file);
+
+            printf("Deposit successful!\n");
+            printf("New Balance: %.2f\n", account.balance);
+
+            found = 1;
+            break;
+        }
+    }
+
+    fclose(file);
+
+    if(found == 0)
+    {
+        printf("Account not found.\n");
+    }
+}
+
+void withdraw()
+{
+    struct Account account;
+    FILE *file;
+    int accountNumber;
+    float amount;
+    int found = 0;
+
+    printf("\nEnter Account Number: ");
+    scanf("%d", &accountNumber);
+
+    file = fopen("account.dat", "rb+");
+
+    if(file == NULL)
+    {
+        printf("No account file found.\n");
+        return;
+    }
+
+    while(fread(&account, sizeof(account), 1, file))
+    {
+        if(account.accountNumber == accountNumber)
+        {
+            printf("Enter withdrawal amount: ");
+            scanf("%f", &amount);
+
+            if(amount > account.balance)
+            {
+                printf("Insufficient balance.\n");
+            }
+            else
+            {
+                account.balance = account.balance - amount;
+
+                fseek(file, -sizeof(account), SEEK_CUR);
+
+                fwrite(&account, sizeof(account), 1, file);
+
+                printf("Withdrawal successful!\n");
+                printf("Remaining Balance: %.2f\n", account.balance);
+            }
+
+            found = 1;
+            break;
+        }
+    }
+
+    fclose(file);
+
+    if(found == 0)
+    {
+        printf("Account not found.\n");
+    }
+}
+
+void balanceEnquiry()
+{
+    struct Account account;
+    FILE *file;
+    int accountNumber;
+    int found = 0;
+
+    printf("\nEnter Account Number: ");
+    scanf("%d", &accountNumber);
+
+    file = fopen("account.dat", "rb");
+
+    if(file == NULL)
+    {
+        printf("No account file found.\n");
+        return;
+    }
+
+    while(fread(&account, sizeof(account), 1, file))
+    {
+        if(account.accountNumber == accountNumber)
+        {
+            printf("\nAccount Number: %d", account.accountNumber);
+            printf("\nName: %s", account.name);
+            printf("\nBalance: %.2f\n", account.balance);
+
+            found = 1;
+            break;
+        }
+    }
+
+    fclose(file);
+
+    if(found == 0)
+    {
+        printf("Account not found.\n");
+    }
+}
+
+int main()
+{
+    int choice;
+
+    do
+    {
+        printf("\n===== BANKING SYSTEM =====\n");
+        printf("1. Create Account\n");
+        printf("2. Deposit\n");
+        printf("3. Withdraw\n");
+        printf("4. Balance Enquiry\n");
+        printf("5. Exit\n");
+
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice)
+        {
+            case 1:
+                createAccount();
+                break;
+
+            case 2:
+                deposit();
+                break;
+
+            case 3:
+                withdraw();
+                break;
+
+            case 4:
+                balanceEnquiry();
+                break;
+
+            case 5:
+                printf("Thank you for using the Banking System.\n");
+                break;
+
+            default:
+                printf("Invalid choice.\n");
+        }
+
+    } while(choice != 5);
+
+    return 0;
+}
